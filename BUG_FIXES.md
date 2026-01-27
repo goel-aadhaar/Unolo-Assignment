@@ -60,3 +60,19 @@ replace null with empty array([])
 
 **Reason**
 reduce can be applied on an empty array without any issues
+
+***Bug 5: Check Out functionality not working***
+
+**Location**
+backend/routes/checkin.js
+                line: 88
+
+**Issue**
+MySQL style syntax being used
+
+**Fix**
+Replace NOW() with datetime('now)
+
+**Resaon**
+Query will properly work using correct SQLite syntax
+
