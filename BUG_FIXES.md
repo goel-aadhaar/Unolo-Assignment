@@ -45,3 +45,18 @@ Trim the email data and convert to lowercase
 
 **Reason**
 Users can give email in mixed lowercase and uppercases but should be considered same
+
+***Bug 4: History page Crash***
+
+**Location**
+frontend/pages/History.jsx 
+                line: 5
+
+**Issue**
+'checkins' initially being null, reduce method can't be applied
+
+**Fix**
+replace null with empty array([])
+
+**Reason**
+reduce can be applied on an empty array without any issues
