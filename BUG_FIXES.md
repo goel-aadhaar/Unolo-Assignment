@@ -76,3 +76,17 @@ Replace NOW() with datetime('now)
 **Resaon**
 Query will properly work using correct SQLite syntax
 
+***Bug 6: Check In functionality not working***
+
+**Location**
+backend/routes/checkin.js
+                line: 57
+
+**Issue**
+Wrong column names being used
+
+**Fix**
+Replace 'lat' with 'latitude' and 'lng' with 'longitude'
+
+**Reason** 
+latitude and longitude are the actual column names of checkins table
