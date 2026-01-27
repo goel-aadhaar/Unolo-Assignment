@@ -90,3 +90,19 @@ Replace 'lat' with 'latitude' and 'lng' with 'longitude'
 
 **Reason** 
 latitude and longitude are the actual column names of checkins table
+
+***Bug 7: OK status code on wrong input***
+
+**Location**
+backend/routes/checkin.js
+                line: 30
+
+**Issue**
+Incorrect Status Code for wrong input
+
+**Fix** 
+Use status code 400 instead of 200
+
+**Reason**
+Client will be getting a status code for wrong input
+
