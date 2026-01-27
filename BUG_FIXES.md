@@ -30,3 +30,18 @@ Use await bcrypt.compare
 
 **Reason**
 After recieveing proper response syncronusly, the value will be assigned to 'isValidPassword'
+
+***Bug 3: Users with correct data not being able to login***
+
+**Location**
+backend/routes/auth.js
+                line: 11
+
+**Issue**
+No proper formatting of data before comparision
+
+**Fix**
+Trim the email data and convert to lowercase
+
+**Reason**
+Users can give email in mixed lowercase and uppercases but should be considered same
