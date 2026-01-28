@@ -137,3 +137,18 @@ convert to DECIMAL
 
 **Reason**
 values will remain consistent across tables
+
+***Bug 10: Unrelible endpoint creation***
+
+**Location**
+frontend/checkin.js
+            line: 15
+
+**Issue**
+risk of data leak
+
+**Fix**
+check for role instead of id
+
+**Reason**
+ID's can be changed in future , but not roles
