@@ -4,6 +4,23 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
+const calculateHaversineDistance = (clientLatitude, clientLongitude, employeeLatitude, employeeLongitude) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const radiusOfEarth = 6371;
+
+    const dLat = toRad(employeeLatitude - clientLatitude);
+    const dLon = toRad(employeeLongitude - clientLongitude);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(clientLatitude)) *
+        Math.cos(toRad(employeeLatitude)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((radiusOfEarth * c).toFixed(2));
+};
+
 // Get assigned clients for employee
 router.get('/clients', authenticateToken, async (req, res) => {
     try {
@@ -25,9 +42,10 @@ router.get('/clients', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
     try {
         const { client_id, latitude, longitude, notes } = req.body;
-
-        if (!client_id) {
-            return res.status(400).json({ success: false, message: 'Client ID is required' });
+        
+        // validate required fields
+        if (!client_id || !latitude || !longitude) {
+            return res.status(400).json({ success: false, message: 'Client ID, latitude, and longitude are required' });
         }
 
         // Check if employee is assigned to this client
@@ -39,6 +57,27 @@ router.post('/', authenticateToken, async (req, res) => {
         if (assignments.length === 0) {
             return res.status(403).json({ success: false, message: 'You are not assigned to this client' });
         }
+
+        // Fetch client location
+        const [clients] = await pool.execute(
+            `SELECT latitude, longitude FROM clients WHERE id = ?`,
+            [client_id]
+        );
+
+        // check if client exists
+        if(clients.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Client not found'
+            });
+        }
+
+        const distance = calculateHaversineDistance(
+            clients[0].latitude,
+            clients[0].longitude,
+            latitude,
+            longitude
+        );
 
         // Check for existing active check-in
         const [activeCheckins] = await pool.execute(
@@ -63,6 +102,7 @@ router.post('/', authenticateToken, async (req, res) => {
             success: true,
             data: {
                 id: result.insertId,
+                distance_from_client: distance,
                 message: 'Checked in successfully'
             }
         });
