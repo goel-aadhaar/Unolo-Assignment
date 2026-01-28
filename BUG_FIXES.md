@@ -106,3 +106,18 @@ Use status code 400 instead of 200
 **Reason**
 Client will be getting a status code for wrong input
 
+***Bug 8: SQL Injection Vulnerability***
+
+**Location**
+backend/routes/checkins.js
+                line: 113,
+                line: 116
+
+**Issue**
+Malicious code can be injected from start_date, end_date variables
+
+**Fix**
+Using Parametrized queries
+
+**Reason**
+through parameterized queries, data from variables is opened at the last stage where there is not risk of malicious activity
