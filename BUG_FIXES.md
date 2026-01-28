@@ -121,3 +121,19 @@ Using Parametrized queries
 
 **Reason**
 through parameterized queries, data from variables is opened at the last stage where there is not risk of malicious activity
+
+***Bug 9: Inconsistent types of latitude and longitude***
+
+**Location**
+database/schema.sql
+                line: 45,
+                line: 46
+
+**Issue**
+Two different datatypes Sring and Deciml causing issues
+
+**Fix**
+convert to DECIMAL 
+
+**Reason**
+values will remain consistent across tables

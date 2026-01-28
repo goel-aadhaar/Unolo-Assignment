@@ -42,8 +42,8 @@ CREATE TABLE checkins (
     client_id INT NOT NULL,
     checkin_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     checkout_time TIMESTAMP NULL,
-    latitude VARCHAR(50),
-    longitude VARCHAR(50),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
     distance_from_client DECIMAL(10, 2) NULL,
     notes TEXT,
     status ENUM('checked_in', 'checked_out') DEFAULT 'checked_in'
