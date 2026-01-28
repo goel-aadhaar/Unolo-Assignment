@@ -11,11 +11,37 @@ function CheckIn({ user }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [distance, setDistance] = useState(null);
 
     useEffect(() => {
         fetchData();
         getCurrentLocation();
     }, []);
+
+    // claculate distance whenever location or selected client changes
+    useEffect(() => {
+        if(!location || !selectedClient) {
+            setDistance(null);
+            return;
+        }
+
+        const client = clients.find((c) => c.id === Number(selectedClient));
+
+        if (!client?.latitude || !client?.longitude) {
+            setDistance(null);
+            return;
+        }
+
+        const dist = calculateHaversineDistance(
+            client.latitude,
+            client.longitude,
+            location.latitude,
+            location.longitude
+        );
+
+        setDistance(dist);
+    } , [location, selectedClient, clients]);
+
 
     const fetchData = async () => {
         try {
@@ -56,6 +82,7 @@ function CheckIn({ user }) {
     };
 
     const handleCheckIn = async (e) => {
+        e.preventDefault();
         setError('');
         setSuccess('');
         setSubmitting(true);
@@ -70,9 +97,10 @@ function CheckIn({ user }) {
 
             if (response.data.success) {
                 setSuccess('Checked in successfully!');
-                setSelectedClient('');
+                // setSelectedClient('');
                 setNotes('');
                 fetchData(); // Refresh data
+                // setDsitance(null);
             } else {
                 setError(response.data.message);
             }
@@ -104,6 +132,23 @@ function CheckIn({ user }) {
         }
     };
 
+    const calculateHaversineDistance = (clientLatitude, clientLongitude, employeeLatitude, employeeLongitude) => {
+        const toRad = (value) => (value * Math.PI) / 180;
+        const radiusOfEarth = 6371;
+
+        const dLat = toRad(employeeLatitude - clientLatitude);
+        const dLon = toRad(employeeLongitude - clientLongitude);
+
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(clientLatitude)) *
+            Math.cos(toRad(employeeLatitude)) *
+            Math.sin(dLon / 2) ** 2;
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return Number((radiusOfEarth * c).toFixed(2));
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -132,9 +177,23 @@ function CheckIn({ user }) {
             <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 className="font-semibold mb-2">Your Current Location</h3>
                 {location ? (
-                    <p className="text-gray-600">
-                        Lat: {location.latitude.toFixed(6)}, Long: {location.longitude.toFixed(6)}
-                    </p>
+                    <>
+                        <p className="text-gray-600">
+                            Lat: {location.latitude.toFixed(6)}, Long: {location.longitude.toFixed(6)}
+                        </p>
+
+                        {distance !== null && (
+                            <p className={`mt-2 text-sm font-medium ${distance > 0.5 ? 'text-red-600' : 'text-green-600'}`}>
+                                Distance to Client: {distance} km
+                            </p>
+                        )}
+
+                        {distance !== null && distance > 0.5 && (
+                            <p className="text-xs text-red-600 mt-1">
+                                You are far from the client location
+                            </p>
+                        )}
+                    </>
                 ) : (
                     <p className="text-gray-500">Getting location...</p>
                 )}
